@@ -1,6 +1,6 @@
 " Tag Highlighter:
 "   Author:  A. S. Budden <abudden _at_ gmail _dot_ com>
-" Copyright: Copyright (C) 2009-2012 A. S. Budden
+" Copyright: Copyright (C) 2009-2013 A. S. Budden
 "            Permission is hereby granted to use and distribute this code,
 "            with or without modifications, provided that this copyright
 "            notice is copied with it. Like anything else that's free,
@@ -190,6 +190,15 @@ function! s:ReadTypes(suffix)
 	let type_files = TagHighlight#ReadTypes#FindTypeFiles(a:suffix)
 	for fname in type_files
 		call TagHLDebug("Loading type highlighter file " . fname, 'Information')
+		let types_path = fnamemodify(fname, ':p:h')
+		let old_dir = getcwd()
+
+		exe 'cd' types_path
+		let b:TagHighlightPrivate['NormalisedPath'] = substitute(
+					\ fnamemodify(fullname, ':.'),
+					\ '\\', '/', 'g')
+		exe 'cd' old_dir
+
 		exe 'so' fname
 		let b:TagHighlightLoadedLibraries +=
 					\ [{
@@ -232,6 +241,11 @@ function! s:ReadTypes(suffix)
 		call TagHLDebug("Calling post-read hook " . postread_hook, 'Information')
 		exe 'call' postread_hook . '(fullname, a:suffix)'
 	endfor
+
+	let reload_colours = TagHighlight#Option#GetOption('ReloadColourScheme')
+	if reload_colours
+		exe "colorscheme" g:colors_name
+	endif
 
 	" Restore the view
 	call winrestview(savedView)

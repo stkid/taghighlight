@@ -3,7 +3,7 @@
 Author:     A. S. Budden <abuddenNOSPAM@NOSPAMgmail.com>
 			Remove NOSPAM.
 
-Copyright:  (c) 2009-2012 by A. S. Budden             *TagHighlight-copyright*
+Copyright:  (c) 2009-2013 by A. S. Budden             *TagHighlight-copyright*
             Permission is hereby granted to use and distribute this code,
             with or without modifications, provided that this copyright
             notice is copied with it. Like anything else that's free,
@@ -443,6 +443,9 @@ Copyright:  (c) 2009-2012 by A. S. Budden             *TagHighlight-copyright*
 		SyntaxLanguageOverrides          Link:|TagHL-SyntaxLanguageOverrides|
 			Force a particular Vim syntax to match a chosen language.
 
+		ReloadColourScheme               Link:|TagHL-ReloadColourScheme|
+			Automatically reload the colour scheme after reading types.
+
 	What to include in the generated types file
 
 		IncludeLocals                    Link:|TagHL-IncludeLocals|
@@ -456,6 +459,9 @@ Copyright:  (c) 2009-2012 by A. S. Budden             *TagHighlight-copyright*
 
 		SkipVimKeywords                  Link:|TagHL-SkipVimKeywords|
 			Don't include vim keywords in highlighter.
+
+		IgnoreFileScope                  Link:|TagHL-IgnoreFileScope|
+			Highlight everything everywhere, ignoring file-scope.
 
 	Customisation:
 
@@ -884,6 +890,17 @@ Copyright:  (c) 2009-2012 by A. S. Budden             *TagHighlight-copyright*
 		Option Type: List
 		Default: [] (empty list)
 
+	IgnoreFileScope                      *TagHL-IgnoreFileScope*
+		Where ctags detects that a variable is limited in scope to only be
+		valid in one source file (for example functions declared with the
+		static keyword in C), TagHighlight will normally only highlight those
+		keywords in the source file in which they're defined.  Setting this
+		option to True or 1 will disable this feature and the keywords will be
+		highlighted in all files in the project.
+
+		Option Type: Boolean
+		Default: False
+
 	IncludeLocals                        *TagHL-IncludeLocals*
 		If set to True or 1, local variables will be included in the types
 		highlighter file.  Note that ctags provides no context for these
@@ -1121,6 +1138,19 @@ Copyright:  (c) 2009-2012 by A. S. Budden             *TagHighlight-copyright*
 
 		Option Type: Boolean
 		Default: True (recurse)
+
+	ReloadColourScheme                   *TagHL-ReloadColourScheme*
+		If this option is set to True or 1, the colour scheme will be reloaded
+		automatically after the types file has been read.  This is done by
+		executing:
+>
+			:exe "colorscheme" g:colors_name
+<
+		so only works if your colour scheme defines g:colors_name (most do).
+		It is provided as a work-around for a bug that is seen on some
+		versions of gvim whereby the colours aren't shown properly on startup.
+		I haven't got to the bottom of this bug, so am providing this
+		work-around as a fix in the meantime.
 
 	SkipPatterns                         *TagHL-SkipPatterns*
 		Any (python) regular expressions listed in this option will be matched
@@ -1493,6 +1523,8 @@ Copyright:  (c) 2009-2012 by A. S. Budden             *TagHighlight-copyright*
 	the available standard libraries are:
 
 	* "Android SDK": Android Software Development Kit (Java)
+	* "C POSIX Library": Standard POSIX libc (C)
+	* "C++ Standard Library": Standard C++ library - libc++ (C++)
 	* "JDK": Java Development Kit (Java)
 	* "PySide": PySide framework (Python; limited support)
 	* "Qt4": Qt4 (C++)
@@ -1507,6 +1539,9 @@ Copyright:  (c) 2009-2012 by A. S. Budden             *TagHighlight-copyright*
 	achieved either by deleting the standard libraries (or not installing them
 	in the first place), or by setting |TagHL-DisableStandardLibraries| to
 	True or 1.
+
+	Thanks to Kévin Brodsky for providing the scripts to generate the libc and
+	libc++ libraries.
 
 ------------------------------------------------------------------------------
 
@@ -1846,38 +1881,51 @@ Copyright:  (c) 2009-2012 by A. S. Budden             *TagHighlight-copyright*
 ==============================================================================
 8. TagHighlight History                *TagHighlight-history*               {{{1
 
-x.x.x: xxth Xxxxxxxx 2012  : Fixed globpath to prevent use of wildignore
-                             option (thanks to Vincent).  Added support for
-                             Javascript (thanks to Piotr Yordanov).
-                             Transferred source repository from git to
-							 mercurial.  Added support for custom ctags
-							 argument lists (option CtagsArguments) in order
-							 to allow use with versions of ctags (like
-							 jsctags) that don't accept the same arguments as
-							 exuberant ctags (thanks to Piotr Yordanov for the
-							 suggestion and help getting jsctags working).
-							 Also added support for CtagsVariant arguments to
-							 simplify this process for known variants.
-							 Support for jsctags is still fairly flaky as
-							 jsctags seems to fail very easily (and I've only
-							 used it for generating tags for its own source
-							 code!).  Added a reference (in the documentation)
-							 to the new wiki.  Added initial version of a
-							 manager for the 'tags' option to automatically
-							 handle tag files for user libraries (thanks to
-							 Alexey Radkov and Ali Hamdi).  Fixed a bug in the
-							 ParsingSkipList option implementation.  Added
-							 option to only generate the tags file if one is
-							 not present or to only generate types file if one
-							 IS present (thanks to Ali Hamdi for the
-							 suggestion).  Added CtagsExtraArguments and
-							 clarified what is meant by CtagsArguments (thanks
-							 to Alan Warren for the suggestion).  Added
-							 support for skipping reserved keywords for given
-							 languages when generating types files.  Initially
-							 the reserved keywords have been recorded for C++,
-							 Python, Java and C#.  Thanks to Alexey Radkov and
-							 Alan Warren for the suggestions.
+x.x.x: xxth Xxxxxxxx 2013  : Major new release with the following changes:
+
+	New features:
+	
+	* Added support for Javascript (thanks to Piotr Yordanov).
+	* Added support for custom ctags argument lists (option CtagsArguments) in
+	  order to allow use with versions of ctags (like jsctags) that don't
+	  accept the same arguments as exuberant ctags (thanks to Piotr Yordanov
+	  for the suggestion and help getting jsctags working).  Support for
+	  jsctags is still fairly flaky as jsctags seems to fail very easily (and
+	  I've only used it for generating tags for its own source code!).
+	* Also added support for CtagsVariant arguments to simplify this process
+	  for known variants.
+	* Added initial version of a manager for the 'tags' option to
+	  automatically handle tag files for user libraries (thanks to Alexey
+	  Radkov and Ali Hamdi).
+	* Added option to only generate the tags file if one is not present or to
+	  only generate types file if one IS present (thanks to Ali Hamdi for the
+	  suggestion).
+	* Added CtagsExtraArguments and clarified what is meant by CtagsArguments
+	  (thanks to Alan Warren for the suggestion).
+	* Added support for skipping reserved keywords for given languages when
+	  generating types files.  Initially the reserved keywords have been
+	  recorded for C++, Python, Java and C#.  Thanks to Alexey Radkov and Alan
+	  Warren for the suggestions.
+	* File-scope variables are only highlighted in the file in which their
+	  scope is valid (thanks to Kévin Brodsky for the suggestion).  An option
+	  called IgnoreFileScope disables this feature.
+	* New standard highlighting libraries: libc and libc++ (thanks to Kévin
+	  Brodsky for producing the scripts that generate these libraries).
+	
+	Bug fixes:
+	
+	* Fixed globpath to prevent use of wildignore option (thanks to Vincent).
+	* Fixed a bug in the ParsingSkipList option implementation.
+	* Added a work-around for an issue with the colour scheme information not
+	  being shown on some gvim implementations on startup (reported by Walker
+	  Inman).
+	* Corrected bug with SkipList operation (thanks to Bruno Jiménez for
+	  reporting this).
+	
+	Other changes:
+                            
+	* Transferred source repository from git to mercurial.
+	* Added a reference (in the documentation) to the new wiki.
 
 2.1.5: 20th February 2012  : Added support for Scala (thanks to Lee Gauthier).
 

@@ -213,6 +213,12 @@ only_generate_types_if_present:
 	Default:False
 	Help:Only generate tags/types if a types file already exists.
 
+reload_colour_scheme:
+	VimOptionMap:ReloadColourScheme
+	Type:bool
+	Default:False
+	Help:Reload the colour scheme after reading types file (in case colours don't work properly)
+
 ##########################
 # Python script options: #
 ##########################
@@ -231,12 +237,26 @@ debug_file:
 	Default:None
 	Help:Debug log file into which messages should be stored
 
+language_tag_types:
+	CommandLineSwitches:--language-tag-types
+	VimOptionMap:LanguageTagTypes
+	Type:dict
+	Default:{}
+	Help:Explicit filter on tag types for a given language
+
 debug_print_time:
 	CommandLineSwitches:--print-time-with-debug
 	VimOptionMap:DebugPrintTime
 	Type:bool
 	Default:False
 	Help:Print the time with each debug message in the log
+
+ignore_file_scope:
+	CommandLineSwitches:--ignore-file-scope
+	VimOptionMap:IgnoreFileScope
+	Type:bool
+	Default:False
+	Help:Ignore file-scope specified in tags file
 
 source_root:
 	CommandLineSwitches:-d,--source-root
